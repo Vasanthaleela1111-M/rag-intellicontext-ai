@@ -1,12 +1,12 @@
 __pycache__/
 *.pyc
 
-venv/
-env/
-
 data/
-
-.faiss/
 vector_store/
 
-.DS_Store
+.streamlit/secrets.toml
+
+.env
+
+venv/
+.venv/
