@@ -1,10 +1,10 @@
 from langchain_community.document_loaders import (
     PyMuPDFLoader,
     TextLoader,
-    CSVLoader,
-    UnstructuredWordDocumentLoader,
-    UnstructuredPowerPointLoader
+    CSVLoader
 )
+
+from pptx import Presentation
 
 from langchain_core.documents import Document
 from docx import Document as DocxDocument
@@ -26,7 +26,25 @@ def load_docx(file_path):
             metadata={"source": file_path}
         )
     ]
+def load_pptx(file_path):
 
+    prs = Presentation(file_path)
+
+    text = []
+
+    for slide in prs.slides:
+
+        for shape in slide.shapes:
+
+            if hasattr(shape, "text"):
+                text.append(shape.text)
+
+    return [
+        Document(
+            page_content="\n".join(text),
+            metadata={"source": file_path}
+        )
+    ]
 
 def load_documents(file_path):
 
@@ -53,13 +71,9 @@ def load_documents(file_path):
     elif file_path.endswith(".docx"):
         return load_docx(file_path)
     
-    elif file_path.endswith(".ppt") or file_path.endswith(".pptx"):
+    elif file_path.endswith(".pptx"):
 
-        docs = UnstructuredPowerPointLoader(
-            file_path
-        ).load()
-
-        return docs
+        return load_pptx(file_path)
 
     else:
         raise ValueError(
