@@ -69,33 +69,22 @@ with st.sidebar:
         # New Chat
         if st.button("➕ New Chat", use_container_width=True):
 
-            chat_number = len(
-                st.session_state.chat_sessions
-            ) + 1
-
-            new_chat_name = f"Chat {chat_number}"
-
-            st.session_state.chat_sessions[
-                new_chat_name
-            ] = [
+            new_chat = f"Chat {len(st.session_state.chat_sessions)+1}"
+            st.session_state.chat_sessions[new_chat] = [
                 {
                     "role": "assistant",
                     "content": "Hello! Welcome to the AI Knowledge Assistant."
                 }
             ]
 
-            st.session_state.current_chat = (
-                new_chat_name
-            )
-
+            st.session_state.current_chat = (new_chat)
             st.rerun()
-
         st.divider()
 
         # Upload Documents
         uploaded_files = st.file_uploader(
             "📂 Upload Documents",
-            type=["pdf", "docx", "txt","csv","ppt","pptx"],
+            type=["pdf", "docx", "txt","csv","pptx"],
             accept_multiple_files=True
         )
 
@@ -104,77 +93,34 @@ with st.sidebar:
             if st.button("⚙️ Process Documents"):
 
                 all_docs = []
-
-                os.makedirs(
-                    "data",
-                    exist_ok=True
-                )
+                os.makedirs("data",exist_ok=True)
 
                 for file in uploaded_files:
 
-                    file_path = os.path.join(
-                        "data",
-                        file.name
-                    )
+                    file_path = os.path.join("data",file.name)
 
-                    with open(
-                        file_path,
-                        "wb"
-                    ) as f:
-
-                        f.write(
-                            file.getbuffer()
-                        )
-
-                    docs = load_documents(
-                        file_path
-                    )
-
-                    all_docs.extend(
-                        docs
-                    )
-
-                build_vector_db(
-                    all_docs
-                )
-
-                st.success(
-                    "✅ Documents Processed Successfully"
-                )
+                    with open(file_path,"wb") as f:
+                        f.write(file.getbuffer())
+                    all_docs.extend(load_documents(file_path))
+                build_vector_db(all_docs)
+                st.success("✅ Documents Processed Successfully")
 
         st.divider()
-
         st.markdown("### 🕘 Chat History")
-
-        chat_names = list(
-            st.session_state.chat_sessions.keys()
-        )
-
-        chat_names.reverse()
-
-        for chat_name in chat_names:
+        for chat_name in reversed(list(st.session_state.chat_sessions.keys())):
 
             col1, col2 = st.columns([4, 1])
-
             with col1:
-
                 if st.button(
                     chat_name,
                     key=f"open_{chat_name}",
                     use_container_width=True
                 ):
-                    st.session_state.current_chat = (
-                        chat_name
-                    )
+                    st.session_state.current_chat = (chat_name)
                     st.rerun()
-
             with col2:
-
-                if (
-                    len(
-                        st.session_state.chat_sessions
-                    ) > 1
-                ):
+                if len(
+                        st.session_state.chat_sessions) > 1:
 
                     if st.button(
                         "🗑",
@@ -477,21 +423,15 @@ elif selected == "🤖 AI Studio":
         ]
     )
 
-    for msg in current_messages:
-
-        with st.chat_message(
-            msg["role"]
-        ):
-            st.write(
-                msg["content"]
-            )
+    for msg in st.session_state.chat_sessions[current_chat]:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
 
     prompt = st.chat_input(
         "Ask anything..."
     )
 
     if prompt:
-
         st.session_state.chat_sessions[
             current_chat
         ].append(
@@ -505,15 +445,10 @@ elif selected == "🤖 AI Studio":
         try:
 
             db = load_vector_db()
-
-            chat_history = (
-                st.session_state.memory.get_history()
-            )
-
             answer, docs = ask_question(
                 db,
                 prompt,
-                chat_history
+                st.session_state.memory.get_history()
             )
 
             st.session_state.memory.add_message(
@@ -522,7 +457,6 @@ elif selected == "🤖 AI Studio":
             )
 
             response = answer
-
             st.session_state.last_sources = docs
 
         except Exception as e:
