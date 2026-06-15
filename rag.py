@@ -186,8 +186,8 @@ natural language conversations powered by AI.
 
     with c1:
         st.metric(
-            "Documents",
-            "PDF • DOCX • PPT"
+            "Document Support",
+            "5 Formats"
         )
 
     with c2:
