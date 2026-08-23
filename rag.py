@@ -443,6 +443,9 @@ elif selected == "🤖 AI Studio":
 
         # Replace with RAG response
         try:
+            import os
+            if not os.path.exists("vector_store/index.faiss"):
+                raise Exception("No documents found. Please upload a file and click 'Process Documents' in the sidebar first!")
 
             db = load_vector_db()
             answer, docs = ask_question(
