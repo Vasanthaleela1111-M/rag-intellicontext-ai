@@ -1,5 +1,5 @@
 from utils.prompt_template import prompt
-from utils.llm_model import llm
+from utils.llm_model import get_llm
 
 
 def ask_question(
