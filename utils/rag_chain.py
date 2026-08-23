@@ -38,6 +38,7 @@ def ask_question(
     print("\nFINAL PROMPT:")
     print(final_prompt)
 
+    llm = get_llm
     response = llm.invoke(final_prompt)
     answer=response.content
     return answer, docs
